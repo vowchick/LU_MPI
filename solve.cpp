@@ -137,7 +137,7 @@ solve (double *a, double *b, double *x, int n, int m, int my_rank, int p, double
     MPI_Barrier (MPI_COMM_WORLD);
     print_matrix(a, n, m, my_rank, p);
     MPI_Barrier (MPI_COMM_WORLD);
-    //Reverse (a, b, x, n, m, my_rank, p, norrm, re, quan, block);
+    Reverse (a, b, x, n, m, my_rank, p, norrm, re, quan, block);
     delete []block;
     delete []recvcounts;
     return 0;
@@ -159,25 +159,25 @@ Reverse (double *a, double *b, double *x,
         else
         {
             MPI_Bcast (buf, m, MPI_DOUBLE, j % p, MPI_COMM_WORLD);
-            for (i = j + 1; i < k; i++)
+        }
+        for (i = j + 1; i < k; i++)
+        {
+            if (my_rank == i % p)
             {
-                if (my_rank == i % p)
-                {
-                    str = get_bounds_vector (i, m, p);
-                    str2 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
-                    mult (a + str2, m, m, 1, buf, column);
-                    v_sum (b + str, column, -1, m);
-                }
+                str = get_bounds_vector (i, m, p);
+                str2 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
+                mult (a + str2, m, m, 1, buf, column);
+                v_sum (b + str, column, -1, m);
             }
-            if (l)
+        }
+        if (l)
+        {
+            if (my_rank == k % p)
             {
-                if (my_rank == k % p)
-                {
-                    str2 = get_bounds (k, j, n, m, l, quan, re, my_rank, p);
-                    mult (a + str2, l, m, 1, buf, column);
-                    str = get_bounds_vector (k, m, p);
-                    v_sum (b + str, column, -1, l);
-                }
+                str2 = get_bounds (k, j, n, m, l, quan, re, my_rank, p);
+                mult (a + str2, l, m, 1, buf, column);
+                str = get_bounds_vector (k, m, p);
+                v_sum (b + str, column, -1, l);
             }
         }
         MPI_Barrier (MPI_COMM_WORLD);
@@ -210,15 +210,15 @@ Reverse (double *a, double *b, double *x,
             {
                 return buf[l];
             }
-            for (i = k - 1; i >= 0; i--)
+        }
+        for (i = k - 1; i >= 0; i--)
+        {
+            if (my_rank == i % p)
             {
-                if (my_rank == i % p)
-                {
-                    str = get_bounds_vector (i, m, p);
-                    str2 = get_bounds (i, k, n, m, l, quan, re, my_rank, p);
-                    mult (a + str2, m, l, 1, buf, column);
-                    v_sum (b + str, column, -1, m);
-                }
+                str = get_bounds_vector (i, m, p);
+                str2 = get_bounds (i, k, n, m, l, quan, re, my_rank, p);
+                mult (a + str2, m, l, 1, buf, column);
+                v_sum (b + str, column, -1, m);
             }
         }
     }
@@ -249,15 +249,15 @@ Reverse (double *a, double *b, double *x,
             {
                 return buf[m];
             }
-            for (i = j - 1; i >= 0; i--)
+        }
+        for (i = j - 1; i >= 0; i--)
+        {
+            if (my_rank == i % p)
             {
-                if (my_rank == i % p)
-                {
-                    str = get_bounds_vector (i, m, p);
-                    str2 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
-                    mult (a + str2, m, m, 1, buf, column);
-                    v_sum (b + str, column, -1, m);
-                }
+                str = get_bounds_vector (i, m, p);
+                str2 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
+                mult (a + str2, m, m, 1, buf, column);
+                v_sum (b + str, column, -1, m);
             }
         }
         MPI_Barrier (MPI_COMM_WORLD);
