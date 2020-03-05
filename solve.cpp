@@ -130,7 +130,7 @@ solve (double *a, double *b, double *x, int n, int m, int my_rank, int p, double
                 str = get_bounds (k, i, n, m, l, quan, re, my_rank, p);
                 mult (a + str, l, m, l, big_column + shift, block);
                 str = get_bounds (k, k, n, m, l, quan, re, my_rank, p);
-                sum (a + str, block, l);
+                sum (a + str, block, l);;
             }
         }
     }
