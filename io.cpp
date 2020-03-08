@@ -11,6 +11,7 @@ read_matrix (double *a, int n, int m, const char *name, int my_rank, int p)
   max[0] = 0;
   int err[1];
   int rerr[1];
+  int flag = 0;
   err[0] = 0;
   FILE *fp = 0;
   MPI_Status status;
@@ -22,6 +23,7 @@ read_matrix (double *a, int n, int m, const char *name, int my_rank, int p)
       if (!fp)
         {
           err[0] = -1;
+          flag = -1;
         }
     }
   MPI_Allreduce(err, rerr, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
@@ -167,7 +169,7 @@ read_matrix (double *a, int n, int m, const char *name, int my_rank, int p)
                 }
             }
     }
-  if (my_rank == 0)
+  if (my_rank == 0 && flag == 0)
     fclose (fp);
   delete []buf;
   MPI_Allreduce(err, rerr, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
@@ -175,6 +177,38 @@ read_matrix (double *a, int n, int m, const char *name, int my_rank, int p)
   if (rerr[0] < 0)
     return rerr[0];
   return rmax[0];
+}
+double
+init_forms (char *namea, double *a, int n, int m, int my_rank, int p)
+{
+    double norm = 0, res = 0;
+    if (namea)
+      {
+        res = read_matrix (a, n, m, namea, my_rank, p);
+        if (res < 0)
+          {
+            delete []a;
+            if (my_rank == 0)
+              {
+                if (res <= -1 && res >= -1)
+                  {
+                    printf ("Couldn't open file %s\n", namea);
+                  }
+                else
+                  {
+                    printf ("Couldn't read from file %s\n", namea);
+                  }
+              }
+            return -1;
+          }
+        else
+          {
+            norm = res;
+          }
+      }
+    else
+      norm = init_matrix (a, n, m, my_rank, p);
+  return norm;
 }
 void
 print_matrix (double *a, int n, int m, int my_rank, int p)

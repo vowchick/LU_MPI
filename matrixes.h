@@ -58,9 +58,9 @@ norma_whole_matrix (double *a, int n, int m);
 int
 get_bounds1 (int i, int j, int n, int m);
 int
-solve (double *a, double *b, double *x, int n, int m, int my_rank, int p, double norrm);
+solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, double *block);
 int
-Reverse (double *a, double *b, double *x, int n, int m, int my_rank,
+Reverse (double *a, double *b, int n, int m, int my_rank,
         int p, double norrm, int re, int quan, double *block);
 void 
 prep_for_gather (int my_rank, int p, int quan, int *displs, int *recvcounts);
@@ -74,6 +74,8 @@ int
 get_bounds_vector (int i/*строка*/, int m, int p);
 double
 norm (double *y, double *z, int n);
+double
+init_forms (char *namea, double *a, int n, int m, int my_rank, int p);
 double
 Ax_b (double *a, double *x, double *b, int n, int m, 
       double *b_i, double *x_i, int p, int my_rank);

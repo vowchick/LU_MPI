@@ -13,7 +13,7 @@ main (int argc, char *argv[])
   int k,
       l; // n / m
   int quan; // колво требуемой памяти для текущего процесса(на матрицу)
-  int bquan, qquan = 0;
+  int bquan, qquan = 0, block_quan = 0, tot_quan= 0;
   MPI_Init (&argc, &argv);
   MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
   MPI_Comm_size (MPI_COMM_WORLD, &p);
@@ -45,6 +45,8 @@ main (int argc, char *argv[])
   quan = k / p;
   qquan = k / p;
   bquan = k / p;
+  tot_quan = k / p;
+  tot_quan *= (m * m);
   bquan *= m;
   quan *= (n * m);
   int re = k%p;
@@ -53,54 +55,34 @@ main (int argc, char *argv[])
       quan += (n * m);
       bquan += m;
       qquan++;
+      tot_quan += (m * m);
   }
   if(my_rank == re && l)
   {
     bquan += l;
     qquan++;
     quan+= (l * n);
+    tot_quan += (m * l);
   }
-  double *a = new double[quan + 3 * bquan + n];
+  block_quan = 2 * m * m + 1 + tot_quan + n * m;
+  double *a = new double[quan + 2 * bquan + n + block_quan];
   if (!a)
     {
       if (my_rank == 0)
         printf ("Not enough memory\n");
       return 0;
     }
-  double *b = a + quan, *r = b + bquan, *x = r + bquan, *x1 = x + bquan;
-  if (namea)
+  double *x = a + quan, *b = x + bquan, *x1 = b + bquan, *block = x1 + n;
+  norm = init_forms (namea, a, n, m, my_rank, p);
+  if (norm <= -1 && norm >= -1)
     {
-      res = read_matrix (a, n, m, namea, my_rank, p);
-      if (res < 0)
-        {
-          delete []a;
-          if (my_rank == 0)
-            {
-              if (res <= -1 && res >= -1)
-                {
-                  printf ("Couldn't open file %s\n", namea);
-                }
-              else
-                {
-                  printf ("Couldn't read from file %s\n", namea);
-                }
-            }
-          MPI_Finalize ();
-          return 0;
-        }
-      else
-        {
-          norm = res;
-        } 
+      MPI_Finalize ();
+      return 0;
     }
-  else
-    norm = init_matrix (a, n, m, my_rank, p);
   print_matrix (a, n, m, my_rank, p);
   if (my_rank == 0)
     printf ("%.2f\n", norm);
   build_b (x, n, a, m, my_rank, p);
-  build_x (b, n, m, my_rank, p);
-  build_r (r, n, m, my_rank, p);
   MPI_Barrier (MPI_COMM_WORLD);
   /*for (int i = 0; i < p; i++)
       {
@@ -110,7 +92,7 @@ main (int argc, char *argv[])
                   printf ("%.2f\n", x[j]);
           }
       }*/
-  res = solve (a, x, b, n, m, my_rank, p, norm);
+  res = solve (a, x, n, m, my_rank, p, norm, block);
    MPI_Barrier (MPI_COMM_WORLD);
   if (res < 0)
     {
@@ -121,41 +103,7 @@ main (int argc, char *argv[])
       return 0;
     }
   MPI_Barrier (MPI_COMM_WORLD);
-  if (namea)
-    {
-      res = read_matrix (a, n, m, namea, my_rank, p);
-      if (res < 0)
-        {
-          delete []a;
-          if (my_rank == 0)
-            {
-              if (res <= -1 && res >= -1)
-                {
-                  printf ("Couldn't open file %s\n", namea);
-                }
-              else
-                {
-                  printf ("Couldn't read from file %s\n", namea);
-                }
-            }
-          MPI_Finalize ();
-          return 0;
-        }
-      else
-        {
-          norm = res;
-        }
-    }
-  else
-    norm = init_matrix (a, n, m, my_rank, p);
-  /*for (int i = 0; i < p; i++)
-    {
-        if (i % p == my_rank)
-        {
-            for (int j = 0; j < bquan; j++)
-                printf ("%.2f\n", b[j]);
-        }
-    }*/
+  init_forms (namea, a, n, m, my_rank, p);
   build_b (b, n, a, m, my_rank, p);
   for (int i = 0; i < p; i++)
   {
