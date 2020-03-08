@@ -106,7 +106,10 @@ get_block (double *a, double *block, int start, int n1, int n2);
 void
 put_block (double *a, double *block, int start, int n1, int n2);
 void
-put_block_into_string (double *string, double *block, int i1, int j1, int i2, int j2, int m);
+put_blocks_into_string (double *a, double *string, double *block, int str_num,
+                        int m, int n, int quan, int re, int my_rank, int p);
+void
+put_block_into_string (double *str, double *block, int n, int m, int size1, int size2, int row_num);
 int
 Inv_U (double *block, double * inv, int b_size, double norrma);
 int

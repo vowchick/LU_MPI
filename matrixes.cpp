@@ -820,21 +820,37 @@ put_zeros (double *a, int start, int size)
     }
 }
 void
-put_block_into_string (double *string, double *block, int i1, int j1, int i2, int j2, int m)
+put_blocks_into_string (double *a, double *string, double *block, int str_num,
+                        int m, int n, int quan, int re, int my_rank, int p)
 {
-    int height = i2 - i1, length = j2 - j1, j;
-    for (int i = 0; i < height; i++)
-      {
-        for (j = 0; j < length - 4; j += 4)
-          {
-            string[(i1 + i) * m + (j1 + j)] = block[i * length + j];
-            string[(i1 + i) * m + (j1 + j + 1)] = block[i * length + j + 1];
-            string[(i1 + i) * m + (j1 + j + 2)] = block[i * length + j + 2];
-            string[(i1 + i) * m + (j1 + j + 3)] = block[i * length + j + 3];
-          }
-        for (; j < length; j++)
-          string[(i1 + i) * m + (j1 + j)] = block[i * length + j];
-      }
+  int k = n / m, l = n % m;
+  int i = 0, j = 0, str = 0, size1 = 0;
+  if (str_num == k)
+      size1 = l;
+  else
+      size1 = m;
+  for (i = 0; i < k; i++)
+    {
+        str = get_bounds (str_num, i, n, m, l, quan, re, my_rank, p);
+        get_block (a, block, str, size1, m);
+        put_block_into_string (string, block, n, m, size1, m, i);
+    }
+  if (l)
+    {
+      put_block_into_string (string, block, n, m, size1, l, k);
+    }
+}
+void
+put_block_into_string (double *str, double *block, int n, int m, int size1, int size2, int row_num)
+{
+  int i = 0, j = 0;
+  for (i = 0; i < size1; i++)
+    {
+      for (j = 0; j < size2; j++)
+        {
+          str[row_num * size1 * size2 + j + i * size2] = block[i * size2 + j];
+        }
+    }
 }
 void
 get_block_from_string (double *string, double *block, int i1, int j1, int i2, int j2, int m)

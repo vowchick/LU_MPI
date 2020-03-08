@@ -105,14 +105,14 @@ main (int argc, char *argv[])
   MPI_Barrier (MPI_COMM_WORLD);
   init_forms (namea, a, n, m, my_rank, p);
   build_b (b, n, a, m, my_rank, p);
-  for (int i = 0; i < p; i++)
+  /*for (int i = 0; i < p; i++)
   {
       if (i % p == my_rank)
       {
           for (int j = 0; j < bquan; j++)
               printf ("%.2f\n", x[j]);
       }
-  }
+  }*/
   MPI_Barrier (MPI_COMM_WORLD);
   double Residual = AX_B_MPI (a, x1, n, my_rank, p, m, b, x);
   MPI_Barrier (MPI_COMM_WORLD);

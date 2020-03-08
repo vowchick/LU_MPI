@@ -4,7 +4,7 @@
 int
 solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, double *block)
 {
-    int i, j, s, k = n / m, l = n % m;
+    int i, j, q, k = n / m, l = n % m;
     int str = 0, shift = 0, str2 = 0;
     int quan = k / p, tot_quan = k / p, an_quan = k / p;
     tot_quan *= (m * m);
@@ -22,11 +22,21 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
         an_quan += l;
         tot_quan += (m * l);
     }
-    double *inv, *column, *big_column;
+    double *inv, *column, *big_row;
     inv = block + m * m;
     column = inv + m * m + 1;
-    big_column = column + tot_quan;
-
+    big_row = column + tot_quan;
+    for (i = 1; i < k; i++)
+      {
+        for (q = 0; q < i; q++)
+          {
+            if (my_rank == q % p)
+              {
+                find_inv (q + 1, my_rank, p, n, m, l, quan, re, a, block, inv, norrm, m);
+                put_blocks_into_string (a, big_row, block, q, m, n, quan, re, my_rank, p);
+              }
+          }
+      }
     Reverse (a, x, n, m, my_rank, p, norrm, re, quan, block);
     return 0;
 }
