@@ -117,7 +117,7 @@ main (int argc, char *argv[])
   MPI_Barrier (MPI_COMM_WORLD);
   if (my_rank == 0)
     printf ("Residual = %e\n", Residual);
-  print_matrix (a, n, m, my_rank, p);
+  //print_matrix (a, n, m, my_rank, p);
   fflush (stdout);
   fflush (stderr);
   delete []a;

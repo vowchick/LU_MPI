@@ -4,7 +4,7 @@
 int
 solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, double *block)
 {
-    int i, j, q, k = n / m, l = n % m;
+    int i, j, q, k = n / m, l = n % m, s, jj;
     int str = 0, str2 = 0, str3 = 0;
     int quan = k / p, tot_quan = k / p, an_quan = k / p;
     tot_quan *= (m * m);
@@ -34,6 +34,21 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
                 find_inv (q + 1, my_rank, p, n, m, l, quan, re, a, block, inv, norrm, m);
                 put_blocks_into_string (a, big_row, block, q, m, n, quan, re, my_rank, p);
                 put_inv(big_row, n * m, inv, m);
+                /*for (s = 0; s < k; s++)
+                {
+                    for (jj = 0; jj < m; jj++)
+                    {
+                        for (int kk = 0; kk < m; kk++)
+                            printf ("%.2f ", big_row[kk + jj * m + s * m * m]);
+                        printf ("\n");
+                    }
+                    for (jj = 0; jj < m; jj++)
+                    {
+                        for (int kk = 0; kk < l; kk++)
+                            printf ("%.2f ", big_row[kk + jj * l + k * m * m]);
+                        printf ("\n");
+                    }
+                }*/
                 MPI_Bcast (big_row, (n + m) * m + 1, MPI_DOUBLE, q % p, MPI_COMM_WORLD);
                 if (big_row[(n + m) * m] < 0)
                   {
@@ -70,6 +85,13 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
                       {
                         str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
                         str2 = get_bounds_row (q, k, n, m);
+                        /*printf ("q = %d, str2 = %d k = %d\n", q, str2, k);
+                        for (s = 0; s < m; s++)
+                        {
+                            for (jj = 0; jj < l; jj++)
+                                printf ("%.2f ", big_row[str2 + jj + s * m]);
+                            printf ("\n");
+                        }*/
                         mult (a + str, m, m, l, big_row + str2, block);
                         str3 = get_bounds (i, k, n, m, l, quan, re, my_rank, p);
                         sum2 (a + str3, block, -1, m, l);
@@ -105,7 +127,7 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
               }
           }
       }
-    print_matrix(a, n, m, my_rank, p);
+    //print_matrix(a, n, m, my_rank, p);
     MPI_Barrier (MPI_COMM_WORLD);
     Reverse (a, x, n, m, my_rank, p, norrm, re, quan, block);
     return 0;

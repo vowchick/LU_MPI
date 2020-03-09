@@ -847,6 +847,8 @@ put_blocks_into_string (double *a, double *string, double *block, int str_num,
     }
   if (l)
     {
+      str = get_bounds (str_num, k, n, m, l, quan, re, my_rank, p);
+      get_block (a, block, str, size1, l);
       put_block_into_string (string, block, n, m, size1, l, k);
     }
 }
