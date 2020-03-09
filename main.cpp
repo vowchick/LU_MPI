@@ -5,7 +5,7 @@ int
 main (int argc, char *argv[])
 {
   int n, m;
-  double res;
+  double res = 0;
   char *namea = 0;
   double norm = 0;
   int my_rank; //номер текущего процесса
@@ -45,8 +45,6 @@ main (int argc, char *argv[])
   quan = k / p;
   qquan = k / p;
   bquan = k / p;
-  tot_quan = k / p;
-  tot_quan *= (m * m);
   bquan *= m;
   quan *= (n * m);
   int re = k%p;
@@ -55,27 +53,28 @@ main (int argc, char *argv[])
       quan += (n * m);
       bquan += m;
       qquan++;
-      tot_quan += (m * m);
   }
   if(my_rank == re && l)
   {
     bquan += l;
     qquan++;
     quan+= (l * n);
-    tot_quan += (m * l);
   }
-  block_quan = 2 * m * m + 1 + tot_quan + n * m;
+  block_quan = 3 * m * m + 2 + n * m;
   double *a = new double[quan + 2 * bquan + n + block_quan];
   if (!a)
     {
       if (my_rank == 0)
         printf ("Not enough memory\n");
+      MPI_Finalize ();
       return 0;
     }
   double *x = a + quan, *b = x + bquan, *x1 = b + bquan, *block = x1 + n;
   norm = init_forms (namea, a, n, m, my_rank, p);
   if (norm <= -1 && norm >= -1)
     {
+      printf ("something\n");
+      delete []a;
       MPI_Finalize ();
       return 0;
     }

@@ -110,6 +110,10 @@ put_blocks_into_string (double *a, double *string, double *block, int str_num,
                         int m, int n, int quan, int re, int my_rank, int p);
 void
 put_block_into_string (double *str, double *block, int n, int m, int size1, int size2, int row_num);
+void
+put_inv (double *str, int start, double *block, int size);
+int
+get_bounds_row (int row_num, int row_col, int n, int m);
 int
 Inv_U (double *block, double * inv, int b_size, double norrma);
 int

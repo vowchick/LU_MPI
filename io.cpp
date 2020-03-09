@@ -187,7 +187,6 @@ init_forms (char *namea, double *a, int n, int m, int my_rank, int p)
         res = read_matrix (a, n, m, namea, my_rank, p);
         if (res < 0)
           {
-            delete []a;
             if (my_rank == 0)
               {
                 if (res <= -1 && res >= -1)

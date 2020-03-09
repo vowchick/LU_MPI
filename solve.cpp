@@ -5,7 +5,7 @@ int
 solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, double *block)
 {
     int i, j, q, k = n / m, l = n % m;
-    int str = 0, shift = 0, str2 = 0;
+    int str = 0, str2 = 0, str3 = 0;
     int quan = k / p, tot_quan = k / p, an_quan = k / p;
     tot_quan *= (m * m);
     an_quan *= m;
@@ -22,10 +22,9 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
         an_quan += l;
         tot_quan += (m * l);
     }
-    double *inv, *column, *big_row;
+    double *inv, *big_row;
     inv = block + m * m;
-    column = inv + m * m + 1;
-    big_row = column + tot_quan;
+    big_row = inv + m * m + 1;
     for (i = 1; i < k; i++)
       {
         for (q = 0; q < i; q++)
@@ -34,9 +33,41 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
               {
                 find_inv (q + 1, my_rank, p, n, m, l, quan, re, a, block, inv, norrm, m);
                 put_blocks_into_string (a, big_row, block, q, m, n, quan, re, my_rank, p);
+                put_inv(big_row, n * m, inv, m);
+                MPI_Bcast (big_row, (n + m) * m + 1, MPI_DOUBLE, q % p, MPI_COMM_WORLD);
+                if (big_row[(n + m) * m] < 0)
+                  {
+                    printf ("something\n");
+                    return big_row[(n + m) * m];
+                  }
+              }
+            else
+              {
+                  MPI_Bcast (big_row, (n + m) * m + 1, MPI_DOUBLE, q % p, MPI_COMM_WORLD);
+                  if (big_row[(n + m) * m] < 0)
+                    {
+                      printf ("something\n");
+                      return big_row[(n + m) * m];
+                    }
+              }
+            if (i % p == my_rank)
+              {
+                str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
+                get_block(a, block, str, m, m);
+                str2 = n * m;
+                sq_prod (block, big_row + str2, a + str, m);
+                for (j = q + 1; j < k; j++)
+                  {
+                    str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
+                    str2 = get_bounds_row (q, j, n, m);
+                    sq_prod (a + str, big_row + str2, block, m);
+                    str3 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
+                    sum (a + str3, block, m);
+                  }
               }
           }
       }
+    MPI_Barrier (MPI_COMM_WORLD);
     Reverse (a, x, n, m, my_rank, p, norrm, re, quan, block);
     return 0;
 }

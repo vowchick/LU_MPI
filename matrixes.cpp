@@ -165,6 +165,16 @@ prep_for_gather (int my_rank, int p, int quan, int *displs, int *recvcounts)
   MPI_Allgather (&disp, 1, MPI_INT, displs, 1, 
                 MPI_INT, MPI_COMM_WORLD);
 }
+int
+get_bounds_row (int row_num, int row_col, int n, int m)
+{
+    int size1 = m, k = n / m, l = n % m;
+    if (row_num == k)
+    {
+        size1 = l;
+    }
+    return row_col * size1 * m;
+}
 void find_inv (int j, int my_rank, int p, int n, int m, int l,
                          int quan, int re, double *a, 
                         double *block, double * inv, double norrm, int size)
@@ -851,6 +861,17 @@ put_block_into_string (double *str, double *block, int n, int m, int size1, int 
           str[row_num * size1 * size2 + j + i * size2] = block[i * size2 + j];
         }
     }
+}
+void
+put_inv (double *str, int start, double *block, int size)
+{
+    int i = 0,j = 0;
+    for (i = 0; i < size; i++)
+        {
+            for (j = 0; j < size; j++)
+                str[start + i * size + j] = block[i * size + j];
+        }
+    str[start + size * size] = block[size * size];
 }
 void
 get_block_from_string (double *string, double *block, int i1, int j1, int i2, int j2, int m)
