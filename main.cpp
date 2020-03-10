@@ -83,16 +83,10 @@ main (int argc, char *argv[])
     printf ("%.2f\n", norm);
   build_b (x, n, a, m, my_rank, p);
   MPI_Barrier (MPI_COMM_WORLD);
-  /*for (int i = 0; i < p; i++)
-      {
-          if (i % p == my_rank)
-          {
-              for (int j = 0; j < bquan; j++)
-                  printf ("%.2f\n", x[j]);
-          }
-      }*/
+  double t = MPI_Wtime ();
   res = solve (a, x, n, m, my_rank, p, norm, block);
-   MPI_Barrier (MPI_COMM_WORLD);
+  MPI_Barrier (MPI_COMM_WORLD);
+  t = MPI_Wtime () - t;
   if (res < 0)
     {
       if (my_rank == 0)
@@ -104,19 +98,11 @@ main (int argc, char *argv[])
   MPI_Barrier (MPI_COMM_WORLD);
   init_forms (namea, a, n, m, my_rank, p);
   build_b (b, n, a, m, my_rank, p);
-  /*for (int i = 0; i < p; i++)
-  {
-      if (i % p == my_rank)
-      {
-          for (int j = 0; j < bquan; j++)
-              printf ("%.2f\n", x[j]);
-      }
-  }*/
   MPI_Barrier (MPI_COMM_WORLD);
   double Residual = AX_B_MPI (a, x1, n, my_rank, p, m, b, x);
   MPI_Barrier (MPI_COMM_WORLD);
   if (my_rank == 0)
-    printf ("Residual = %e\n", Residual);
+    printf ("Residual = %e Elapsed = %.2f n = %d m = %d\n", Residual, t, n, m);
   //print_matrix (a, n, m, my_rank, p);
   fflush (stdout);
   fflush (stderr);

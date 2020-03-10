@@ -265,7 +265,7 @@ print_matrix (double *a, int n, int m, int my_rank, int p)
             {
               MPI_Recv (buf, n * l, MPI_DOUBLE, k % p, tag,
                         MPI_COMM_WORLD, &status);
-              if (k * m + m > max_print)
+              if (k * m + l > max_print)
                 {
                   quan = max_print - k * m;
                 }
@@ -275,7 +275,7 @@ print_matrix (double *a, int n, int m, int my_rank, int p)
             }
           else
             {
-              if (k * m + m > max_print)
+              if (k * m + l > max_print)
                 {
                   quan = max_print - k * m;
                 }
@@ -286,7 +286,10 @@ print_matrix (double *a, int n, int m, int my_rank, int p)
             }
       }
   if (my_rank == 0)
-    delete []buf;
+    {
+      printf ("that's all\n");
+      delete []buf;
+  }
 }
 void
 print_block_string (double *a, int n, int m, int m_l, int quan)
@@ -297,7 +300,9 @@ print_block_string (double *a, int n, int m, int m_l, int quan)
            for (i = 0; i < k; i++)
             {
                 for (j = 0; j < m && j + i * m < max_print; j++)
+                {
                     printf ("%.2f ", a[j + i * m * m_l + q * m]);
+                }
 
             }
            for (j = 0; j < l && j + k * m < max_print; j++)

@@ -109,7 +109,7 @@ void
 put_blocks_into_string (double *a, double *string, double *block, int str_num,
                         int m, int n, int quan, int re, int my_rank, int p);
 void
-put_block_into_string (double *str, double *block, int n, int m, int size1, int size2, int row_num);
+put_block_into_string (double *str, double *block, int n, int m, int size1, int size2, int size3, int row_num);
 void
 put_inv (double *str, int start, double *block, int size);
 int

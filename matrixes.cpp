@@ -843,24 +843,24 @@ put_blocks_into_string (double *a, double *string, double *block, int str_num,
     {
         str = get_bounds (str_num, i, n, m, l, quan, re, my_rank, p);
         get_block (a, block, str, size1, m);
-        put_block_into_string (string, block, n, m, size1, m, i);
+        put_block_into_string (string, block, n, m, size1, m, m, i);
     }
   if (l)
     {
       str = get_bounds (str_num, k, n, m, l, quan, re, my_rank, p);
       get_block (a, block, str, size1, l);
-      put_block_into_string (string, block, n, m, size1, l, k);
+      put_block_into_string (string, block, n, m, size1, m, l, k);
     }
 }
 void
-put_block_into_string (double *str, double *block, int n, int m, int size1, int size2, int row_num)
+put_block_into_string (double *str, double *block, int n, int m, int size1, int size2, int size3, int row_num)
 {
   int i = 0, j = 0;
   for (i = 0; i < size1; i++)
     {
-      for (j = 0; j < size2; j++)
+      for (j = 0; j < size3; j++)
         {
-          str[row_num * size1 * size2 + j + i * size2] = block[i * size2 + j];
+          str[row_num * size1 * size2 + j + i * size3] = block[i * size3 + j];
         }
     }
 }
