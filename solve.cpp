@@ -5,13 +5,11 @@
 int
 solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, double *block)
 {
-    int i, j, q, k = n / m, l = n % m, s, jj;
+    int i, j, q, k = n / m, l = n % m;
     int str = 0, str2 = 0, str3 = 0;
     int quan = k / p, tot_quan = k / p, an_quan = k / p;
     tot_quan *= (m * m);
     an_quan *= m;
-    int quantitytyt = get_nprocs ();
-    printf ("количество = %d\n", quantitytyt);
     int re = k%p;
     if (my_rank < re)
     {
@@ -108,7 +106,6 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
               }
           }
       }
-    MPI_Barrier (MPI_COMM_WORLD);
     Reverse (a, x, n, m, my_rank, p, norrm, re, quan, block);
     return 0;
 }
@@ -150,10 +147,8 @@ Reverse (double *a, double *b,
                 v_sum (b + str, column, -1, l);
             }
         }
-        MPI_Barrier (MPI_COMM_WORLD);
     }
     //The Ux = b part of the solution
-    MPI_Barrier (MPI_COMM_WORLD);
     if (l)
     {
         if (k % p == my_rank)
@@ -192,7 +187,6 @@ Reverse (double *a, double *b,
             }
         }
     }
-    MPI_Barrier (MPI_COMM_WORLD);
     for (j = k - 1; j >= 0; j--)
     {
         if (j % p == my_rank)
@@ -230,7 +224,6 @@ Reverse (double *a, double *b,
                 v_sum (b + str, column, -1, m);
             }
         }
-        MPI_Barrier (MPI_COMM_WORLD);
     }
     return 0;
 }
