@@ -49,6 +49,26 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
                 return big_row[(n + m) * m];
               }
           }
+        for (i = q + 1; i < k; i++)
+          {
+            if (i % p == my_rank)
+              {
+                // Aiq = Aiq * inv Aqq
+                str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
+                get_block (a, block, str, m, m);
+                str2 = n * m;
+                sq_prod (block, big_row + str2, a + str, m);
+                for (j = q + 1; j < k; j++)
+                  {
+                    //Aij = Aij - Liq * Aqj
+                    str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
+                    str2 = get_bounds_row (q, j, n, m);
+                    sq_prod (a + str, big_row + str2, block, m);
+                    str3 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
+                    sum (a + str3, block, m);
+                  }
+              }
+          }
       }
     Reverse (a, x, n, m, my_rank, p, norrm, re, quan, block);
     return 0;

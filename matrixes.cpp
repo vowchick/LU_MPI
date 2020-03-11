@@ -858,7 +858,14 @@ put_block_into_string (double *str, double *block, int size1, int size2, int siz
   int i = 0, j = 0;
   for (i = 0; i < size1; i++)
     {
-      for (j = 0; j < size3; j++)
+      for (j = 0; j < size3 - 4; j += 4)
+        {
+          str[row_num * size1 * size2 + j + i * size3] = block[i * size3 + j];
+          str[row_num * size1 * size2 + j + 1 + i * size3] = block[i * size3 + j + 1];
+          str[row_num * size1 * size2 + j + 2 + i * size3] = block[i * size3 + j + 2];
+          str[row_num * size1 * size2 + j + 3 + i * size3] = block[i * size3 + j + 3];
+        }
+      for (; j < size3; j++)
         {
           str[row_num * size1 * size2 + j + i * size3] = block[i * size3 + j];
         }
