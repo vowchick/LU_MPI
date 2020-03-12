@@ -1,7 +1,6 @@
 ﻿#include "matrixes.h"
 //#include "time.h"
 //in case of a mistake should return -10
-#include <sys/sysinfo.h>
 int
 solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, double *block)
 {

@@ -1,5 +1,6 @@
 #include "matrixes.h"
 #include "time.h"
+#include <sys/sysinfo.h>
 
 int
 main (int argc, char *argv[])
