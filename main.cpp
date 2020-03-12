@@ -73,7 +73,6 @@ main (int argc, char *argv[])
   norm = init_forms (namea, a, n, m, my_rank, p);
   if (norm <= -1 && norm >= -1)
     {
-      printf ("something\n");
       delete []a;
       MPI_Finalize ();
       return 0;
@@ -90,7 +89,7 @@ main (int argc, char *argv[])
   if (res < 0)
     {
       if (my_rank == 0)
-        printf ("Some awfull mistake occured!\n");
+        printf ("Solution cannot be found!\n");
       delete []a;
       MPI_Finalize ();
       return 0;
@@ -102,7 +101,7 @@ main (int argc, char *argv[])
   double Residual = AX_B_MPI (a, x1, n, my_rank, p, m, b, x);
   MPI_Barrier (MPI_COMM_WORLD);
   if (my_rank == 0)
-    printf ("Residual = %e Elapsed = %.2f n = %d m = %d\n", Residual, t, n, m);
+    printf ("Residual = %e Elapsed = %.2f n = %d m = %d p = %d\n", Residual, t, n, m, p);
   //print_matrix (a, n, m, my_rank, p);
   fflush (stdout);
   fflush (stderr);

@@ -36,7 +36,6 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
             MPI_Bcast (big_row, (n + m) * m + 1, MPI_DOUBLE, q % p, MPI_COMM_WORLD);
             if (big_row[(n + m) * m] < 0)
               {
-                printf ("something\n");
                 return big_row[(n + m) * m];
               }
           }
@@ -45,33 +44,69 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
             MPI_Bcast (big_row, (n + m) * m + 1, MPI_DOUBLE, q % p, MPI_COMM_WORLD);
             if (big_row[(n + m) * m] < 0)
               {
-                printf ("something\n");
                 return big_row[(n + m) * m];
               }
           }
-        for (i = q + 1; i < k; i++)
+        for (i = q + 1; i <= k; i++)
           {
             if (i % p == my_rank)
               {
                 // Aiq = Aiq * inv Aqq
-                str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
-                get_block (a, block, str, m, m);
-                str2 = n * m;
-                sq_prod (block, big_row + str2, a + str, m);
-                for (j = q + 1; j < k; j++)
-                  {
-                    //Aij = Aij - Liq * Aqj
-                    str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
-                    str2 = get_bounds_row (q, j, n, m);
-                    sq_prod (a + str, big_row + str2, block, m);
-                    str3 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
-                    sum (a + str3, block, m);
-                  }
+              if (i != k)
+                {
+                  str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
+                  get_block (a, block, str, m, m);
+                  str2 = n * m;
+                  sq_prod (block, big_row + str2, a + str, m);
+                  for (j = q + 1; j < k; j++)
+                    {
+                      //Aij = Aij - Liq * Aqj
+                      str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
+                      str2 = get_bounds_row (q, j, n, m);
+                      sq_prod (a + str, big_row + str2, block, m);
+                      str3 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
+                      sum (a + str3, block, m);
+                    }
+                  if (l)
+                    {
+                      str = get_bounds (i, q, n, m, l, quan, re, my_rank, p);
+                      str2 = get_bounds_row (q, k, n, m);
+                      mult (a + str, m, m, l, big_row + str2, block);
+                      str3 = get_bounds (i, k, n, m, l, quan, re, my_rank, p);
+                      sum2 (a + str3, block, -1, m, l);
+                    }
+                }
+              else if (l && my_rank == re)
+                {
+                  str = get_bounds (k, q, n, m, l, quan, re, my_rank, p);
+                  get_block (a, block, str, l, m);
+                  str2 = n * m;
+                  //sq_prod (block, big_row + str2, a + str, m);
+                  mult (block, l, m, m, big_row + str2, a + str);
+                  for (j = q + 1; j < k; j++)
+                    {
+                      //Aij = Aij - Liq * Aqj
+                      str = get_bounds (k, q, n, m, l, quan, re, my_rank, p);
+                      str2 = get_bounds_row (q, j, n, m);
+                      mult (a + str, l, m, m, big_row + str2, block);
+                      //sq_prod (a + str, big_row + str2, block, m);
+                      str3 = get_bounds (k, j, n, m, l, quan, re, my_rank, p);
+                      sum2 (a + str3, block, -1, l, m);
+                    }
+                  if (l)
+                    {
+                      str = get_bounds (k, q, n, m, l, quan, re, my_rank, p);
+                      str2 = get_bounds_row (q, k, n, m);
+                      mult (a + str, l, m, l, big_row + str2, block);
+                      str3 = get_bounds (k, k, n, m, l, quan, re, my_rank, p);
+                      sum (a + str3, block, l);
+                    }
+                }
               }
           }
       }
-    Reverse (a, x, n, m, my_rank, p, norrm, re, quan, block);
-    return 0;
+    int res = Reverse (a, x, n, m, my_rank, p, norrm, re, quan, block);
+    return res;
 }
 int
 Reverse (double *a, double *b,
@@ -121,9 +156,12 @@ Reverse (double *a, double *b,
             get_block(a, block, str, l, l);
             find_inv (k + 1, my_rank, p, n, m, l, quan, re,
                       a, block, inv, norrm, l);
-            str2 = get_bounds_vector(k, m, p);
-            get_vect (b, column, str2, str2 + l);
-            mult (inv, l, l, 1, column, b + str2);
+            if (inv[l * l] >= 0)
+            {
+              str2 = get_bounds_vector(k, m, p);
+              get_vect (b, column, str2, str2 + l);
+              mult (inv, l, l, 1, column, b + str2);
+            }
             get_vect(b, buf, str2, str2 + l);
             buf[l] = inv[l * l];
             MPI_Bcast (buf, l + 1, MPI_DOUBLE, my_rank, MPI_COMM_WORLD);
@@ -159,9 +197,12 @@ Reverse (double *a, double *b,
             get_block(a, block, str, m, m);
             find_inv (j + 1, my_rank, p, n, m, l, quan, re,
                       a, block, inv, norrm, m);
-            str2 = get_bounds_vector(j, m, p);
-            get_vect (b, column, str2, str2 + m);
-            mult (inv, m, m, 1, column, b + str2);
+            if (inv[m * m] >= 0)
+              {
+                str2 = get_bounds_vector(j, m, p);
+                get_vect (b, column, str2, str2 + m);
+                mult (inv, m, m, 1, column, b + str2);
+              }
             get_vect(b, buf, str2, str2 + m);
             buf[m] = inv[m * m];
             MPI_Bcast (buf, m + 1, MPI_DOUBLE, my_rank, MPI_COMM_WORLD);

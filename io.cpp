@@ -287,9 +287,8 @@ print_matrix (double *a, int n, int m, int my_rank, int p)
       }
   if (my_rank == 0)
     {
-      printf ("that's all\n");
       delete []buf;
-  }
+    }
 }
 void
 print_block_string (double *a, int n, int m, int m_l, int quan)
