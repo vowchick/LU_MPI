@@ -75,6 +75,8 @@ get_bounds_vector (int i/*строка*/, int m, int p);
 double
 norm (double *y, double *z, int n);
 double
+norm_mist (double *r, double *x, int n, int m, int my_rank, int p);
+double
 init_forms (char *namea, double *a, int n, int m, int my_rank, int p);
 double
 Ax_b (double *a, double *x, double *b, int n, int m, 
@@ -129,7 +131,7 @@ sum (double *a, double *b, int size); // видимо переписать
 void
 Reverse_Gauss (args *arg, double norrma);
 void
-v_sum (double *a, double *b, int coef, int size);
+v_sum (double *a, double *b, int size);
 void
 get_vect (double *b, double *vect, int i1, int i2);
 void
@@ -137,7 +139,7 @@ put_vect (double *b, double *vect, int i1, int i2);
 void 
 sq_prod (double *a, double *b, double *c, int n);
 void
-sum2 (double *a, double *b, int coef, int size1, int size2);
+sum2 (double *a, double *b, int size1, int size2);
 void
 put_zeros (double *a, int start, int size);
 void

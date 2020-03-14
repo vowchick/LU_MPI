@@ -62,7 +62,7 @@ main (int argc, char *argv[])
     quan+= (l * n);
   }
   block_quan = 3 * m * m + 2 + n * m;
-  double *a = new double[quan + 2 * bquan + n + block_quan];
+  double *a = new double[quan + 3 * bquan + n + block_quan];
   if (!a)
     {
       if (my_rank == 0)
@@ -70,7 +70,7 @@ main (int argc, char *argv[])
       MPI_Finalize ();
       return 0;
     }
-  double *x = a + quan, *b = x + bquan, *x1 = b + bquan, *block = x1 + n;
+  double *x = a + quan, *b = x + bquan, *x1 = b + bquan, *block = x1 + n, *r = block + block_quan;
   norm = init_forms (namea, a, n, m, my_rank, p);
   if (norm <= -1 && norm >= -1)
     {
@@ -82,6 +82,7 @@ main (int argc, char *argv[])
   if (my_rank == 0)
     printf ("%.2f\n", norm);
   build_b (x, n, a, m, my_rank, p);
+  build_r (r, n, m, my_rank, p);
   MPI_Barrier (MPI_COMM_WORLD);
   double t = MPI_Wtime ();
   res = solve (a, x, n, m, my_rank, p, norm, block);
@@ -98,6 +99,7 @@ main (int argc, char *argv[])
   MPI_Barrier (MPI_COMM_WORLD);
   init_forms (namea, a, n, m, my_rank, p);
   build_b (b, n, a, m, my_rank, p);
+  //double MIST = norm_mist (r, x, n, m, my_rank, p);
   MPI_Barrier (MPI_COMM_WORLD);
   double Residual = AX_B_MPI (a, x1, n, my_rank, p, m, b, x);
   MPI_Barrier (MPI_COMM_WORLD);

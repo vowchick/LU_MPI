@@ -523,7 +523,7 @@ build_r (double *x, int n, int m, int my_rank, int p)
         {
           for (int j = 0; j < m; j++)
             {
-              x[loc_q * m + j] = ((i * m + j) % 2 == 0? 1:0);
+              x[loc_q * m + j] = ((i * m + j) % 2 == 0? 0:1);
             }
           loc_q++;
         }
@@ -532,7 +532,7 @@ build_r (double *x, int n, int m, int my_rank, int p)
       {
         for (int j = 0; j < l; j++)
           {
-            x[loc_q * m + j] = ((k * m + j) % 2 == 0? 1:0);
+            x[loc_q * m + j] = ((k * m + j) % 2 == 0? 0:1);
           }
         loc_q++;
       }

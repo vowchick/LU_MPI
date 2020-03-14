@@ -72,7 +72,7 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
                       str2 = get_bounds_row (q, k, n, m);
                       mult (a + str, m, m, l, big_row + str2, block);
                       str3 = get_bounds (i, k, n, m, l, quan, re, my_rank, p);
-                      sum2 (a + str3, block, -1, m, l);
+                      sum2 (a + str3, block, m, l);
                     }
                 }
               else if (l && my_rank == re)
@@ -90,7 +90,7 @@ solve (double *a, double *x, int n, int m, int my_rank, int p, double norrm, dou
                       mult (a + str, l, m, m, big_row + str2, block);
                       //sq_prod (a + str, big_row + str2, block, m);
                       str3 = get_bounds (k, j, n, m, l, quan, re, my_rank, p);
-                      sum2 (a + str3, block, -1, l, m);
+                      sum2 (a + str3, block, l, m);
                     }
                   if (l)
                     {
@@ -132,7 +132,7 @@ Reverse (double *a, double *b,
                 str = get_bounds_vector (i, m, p);
                 str2 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
                 mult (a + str2, m, m, 1, buf, column);
-                v_sum (b + str, column, -1, m);
+                v_sum (b + str, column, m);
             }
         }
         if (l)
@@ -142,7 +142,7 @@ Reverse (double *a, double *b,
                 str2 = get_bounds (k, j, n, m, l, quan, re, my_rank, p);
                 mult (a + str2, l, m, 1, buf, column);
                 str = get_bounds_vector (k, m, p);
-                v_sum (b + str, column, -1, l);
+                v_sum (b + str, column, l);
             }
         }
     }
@@ -184,7 +184,7 @@ Reverse (double *a, double *b,
                 str = get_bounds_vector (i, m, p);
                 str2 = get_bounds (i, k, n, m, l, quan, re, my_rank, p);
                 mult (a + str2, m, l, 1, buf, column);
-                v_sum (b + str, column, -1, m);
+                v_sum (b + str, column, m);
             }
         }
     }
@@ -225,7 +225,7 @@ Reverse (double *a, double *b,
                 str = get_bounds_vector (i, m, p);
                 str2 = get_bounds (i, j, n, m, l, quan, re, my_rank, p);
                 mult (a + str2, m, m, 1, buf, column);
-                v_sum (b + str, column, -1, m);
+                v_sum (b + str, column, m);
             }
         }
     }

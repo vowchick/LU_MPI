@@ -20,6 +20,36 @@ norm (double * y, double *z, int n)
         max = fabs (y[i] - z[i]);
   return max;
 }
+double
+norm_mist (double *r, double *x, int n, int m, int my_rank, int p)
+{
+    int k = n / m, l = n % m, i = 0, j = 0, loc_q = 0;
+    double max = 0;
+    for (i = 0; i < k; i++)
+      {
+        if (my_rank == i % p)
+          {
+            for (j = 0; j < m; j++)
+              {
+                if (max < fabs (r[j + loc_q * m] - x[j + loc_q * m]))
+                  max = fabs (r[j + loc_q * m] - x[j + loc_q * m]);
+              }
+            loc_q++;
+          }
+      }
+    if (l && my_rank == k % p)
+      {
+        for (j = 0; j < l; j++)
+          {
+            if (max < fabs (r[j + loc_q * m] - x[j + loc_q * m]))
+              max = fabs (r[j + loc_q * m] - x[j + loc_q * m]);
+          }
+        loc_q++;
+      }
+  double res = 0;
+  MPI_Allreduce (&max, &res, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+  return res / 400;
+}
 void
 mult_and_diff_v (int str, int col, int n, int m, int quan, int re, int my_rank, int p,
                  double *a, int left, int middle, int right, double *buf, double *column, double *b)
@@ -28,7 +58,7 @@ mult_and_diff_v (int str, int col, int n, int m, int quan, int re, int my_rank, 
     str2 = get_bounds (str, col, n, m, l, quan, re, my_rank, p);
     mult (a + str2, left, middle, right, buf, column);
     str1 = get_bounds_vector (str, m, p);
-    v_sum (b + str1, column, -1, left);
+    v_sum (b + str1, column, left);
 }
 void
 send_vect (int j, int m, int p, double *b, double *buf, int my_rank)
@@ -392,16 +422,16 @@ LU (double *block, int b_size, double norrma)
   if (fabs (block[0]) < EPS * norm)
     return -1;
   int k, j;
-  double rev = 1./block[0];
+  //double rev = 1./block[0];
   for (k = 1; k < b_size - 4; k += 4)
     {
-      block[k] *= rev;
-      block[k + 1] *= rev;
-      block[k + 2] *= rev;
-      block[k + 3] *= rev;
+      block[k] /= block[0];
+      block[k + 1] /= block[0];
+      block[k + 2] /= block[0];
+      block[k + 3] /= block[0];
     }
   for (; k < b_size; k++)
-      block[k] *= rev;
+      block[k] /= block[0];
   for (int i = 1; i < b_size; i++)
     {
       if (fabs (block[i * b_size + i]) < EPS * norm)
@@ -684,12 +714,12 @@ mult (double *a, int m, int n, int k, double *b,double *c)
     }
 }
 void
-sum2 (double *a, double *b, int coef, int size1, int size2)
+sum2 (double *a, double *b, int size1, int size2)
 {
     for (int i = 0; i < size1; i++)
     {
       for (int j = 0; j < size2; j++)
-        a[i * size2 + j] += (b[i * size2 + j] * coef);
+        a[i * size2 + j] -= (b[i * size2 + j]);
     }
 }
 void
@@ -726,10 +756,10 @@ sum (double *a, double *b, int size)
   }
 }
 void
-v_sum (double *a, double *b, int coef, int size)
+v_sum (double *a, double *b, int size)
 {
   for (int i = 0; i < size; i++)
-    a[i] += (b[i] * coef);
+    a[i] -= (b[i]);
 }
 void
 get_vect (double *b, double *vect, int i1, int i2)
